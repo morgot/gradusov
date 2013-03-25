@@ -75,7 +75,7 @@ int main()
 
     // Выборка по заданному критерию
     vector< vector< double > > solve;
-
+    solve.clear();
     double eps = 10;
     cout << "Энергии связных состояний: "<< endl;
 
@@ -97,11 +97,13 @@ int main()
     // Вывод в файл
     ofstream output("output.txt");
 
-    for(int i=0; i < solve[0].size(); i++){
-        for(int j = 0; j < solve.size(); j++){
-            output << h*(i+1) << " "<< solve[j][i] << " ";
+    for(int i=0; i < solve.size(); i++){
+        output << "#E = "<< E[i] << endl;
+        for(int j = 0; j < solve[0].size(); j++){
+            output << h*(j+1) << " "<< solve[i][j] << endl;
         };
-    output << std::endl;
+    output << endl;
+    output << endl;
     };
 
     output.close();
