@@ -2,8 +2,8 @@
 
 using namespace std;
 
-#include "alglib/ap.h"
-#include "alglib/linalg.h"
+#include "alglib_headers/ap.h"
+#include "alglib_headers/linalg.h"
 #include <fstream>
 #include <vector>
 #include <cmath>
@@ -46,7 +46,6 @@ int main()
     f.setlength( N, N );
     A.setlength( N, N );
     B.setlength( N, N );
-
     for ( int i; i < A.rows(); i++)
         for ( int j = 0; j < A.cols(); j++ ) A[i][j] = 0;
 
