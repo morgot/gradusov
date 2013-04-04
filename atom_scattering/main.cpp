@@ -32,7 +32,7 @@ int main()
     cin >> a;
     cout << endl;
 
-    x_max = 2*a;
+    x_max = 1.5*a;
 
     cout << "Введите l: ";
     cin >> l;
@@ -48,24 +48,25 @@ int main()
     for ( int i = 0; i <= N-1; i++){
 
         if( i != 0 ) {
-            Dl[i-1] = complex<double>( 1 - h*h/12*F( x-h, l, a, V_0, k ), 0 );
+            Dl[i-1] = complex<double>( 1 - h*h/12.0*F( x-h, l, a, V_0, k ), 0 );
         }
-        D[i] = complex<double>( (-2)-10*F( x, l, a, V_0, k )*h*h/12, 0);
+        D[i] = complex<double>( (-2)-10*F( x, l, a, V_0, k )*h*h/12.0, 0);
 
         if( i != N-1 ){
-            Du[i] = complex<double>(1 - h*h/12*F( x+h, l, a, V_0, k ), 0);
+            Du[i] = complex<double>(1 - h*h/12.0*F( x+h, l, a, V_0, k ), 0);
         }
         x += h;
 
     }
-    D[N-1] =complex<double>( (-2)-10*F( x, l, a, V_0, k )*h*h/12+cos(k*h), sin(k*h) );
+    D[N-1] =complex<double>( (-2)-10*F( x-h, l, a, V_0, k )*h*h/12.0+cos(k*h)*(1-F(x,l, a, V_0, k)*h*h/12.0), sin(k*h)*(1-F(x,l, a, V_0, k)*h*h/12.0) );
     x = h;
     for( int i = 0; i < N; i++){
-        f[i] = (potential_V(x+h, a, V_0)*J(k*(x+h),l)+potential_V(x, a, V_0)*J(k*x,l)+potential_V(x-h, a, V_0)*J(k*(x-h),l))*(-h)*h/12;
+        f[i] = (potential_V(x+h, a, V_0)*J(k*(x+h),l)+potential_V(x, a, V_0)*J(k*x,l)+potential_V(x-h, a, V_0)*J(k*(x-h),l))*(-h)*h/12.0;
         x += h;
     }
+    std::cout << endl;
     linSolve(Dl, D, Du, f, y);
-
+    print(y);
     A = amplitude(k, l, h, a, V_0, y);
     cout << A;
 
