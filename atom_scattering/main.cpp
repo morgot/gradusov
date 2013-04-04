@@ -66,6 +66,7 @@ int main()
     }
     linSolve(Dl, D, Du, f, y);
 
+    print(y);
     A = amplitude(k, l, h, a, V_0, y);
     cout << A;
 
@@ -115,7 +116,7 @@ void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector
     }
     for (int i = D.size()-1; i > 0; i--){
 
-        x[i-1] -= x[i-1]*Du[i]/D[i];
+        x[i-1] -= x[i]*Du[i]/D[i];
     }
     for (int i=0; i < D.size(); i++){
         x[i]/=D[i];
