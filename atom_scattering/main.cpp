@@ -15,6 +15,7 @@ void print( vector<complex<double> > A );
 
 complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y );
 complex<double> delta( double k, int l, complex<double> A );
+double delta_second( double k, int l, complex<double> A );
 
 int main()
 {
@@ -82,7 +83,7 @@ int main()
     A = amplitude(k, l, h, a, V_0, y);
 
 
-    output << delta( k, l, A );
+    output << delta_second( k, l, A );
         output << endl;
 
 }
@@ -160,4 +161,8 @@ complex<double> amplitude( double k, int l, double h, double a, double V_0, vect
 }
 complex<double> delta( double k, int l, complex<double> A ){
     return std::log(complex<double>(1,0)+complex<double>(2*k,0)*A*complex<double>(0,1) )/complex<double>(0,2);
+}
+
+double delta_second ( double k, int l, complex<double> A ) {
+	return atan( 2*k*A.real()/(1-2*k*A.imag()) )/2;
 }
