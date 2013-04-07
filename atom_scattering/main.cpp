@@ -2,17 +2,19 @@
 #include <math.h>
 #include <complex>
 #include <vector>
+#include <fstream>
 using namespace std;
 
 double potential_V ( double r, double a, double V_0 );
-double F( double x, int l, double a, double V_0, int k );
+double F( double x, int l, double a, double V_0, double k );
 
 double j( double x, int l);
 double J( double x, int l);
 void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector<complex<double> >  Du, vector<complex<double> >  f, vector<complex<double> >  &x);
 void print( vector<complex<double> > A );
 
-complex<double> amplitude( int k, int l, double h, double a, double V_0, vector<complex<double> > y );
+complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y );
+complex<double> delta( double k, int l, complex<double> A );
 
 int main()
 {
@@ -37,10 +39,8 @@ int main()
     cout << "Введите l: ";
     cin >> l;
     cout << endl;
-
-    cout << "Введите k: ";
-    cin >> k;
-    cout << endl;
+ofstream output("output.txt");
+    for (double k = 0.05; k<5; k+=0.05){
     // Расчет матрицы A:
     vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
     h = x_max/N;
@@ -64,13 +64,22 @@ int main()
         f[i] = (potential_V(x+h, a, V_0)*J(k*(x+h),l)+potential_V(x, a, V_0)*J(k*x,l)+potential_V(x-h, a, V_0)*J(k*(x-h),l))*(-h)*h/12.0;
         x += h;
     }
-    std::cout << endl;
+
     linSolve(Dl, D, Du, f, y);
-    print(y);
+    x=0;
+    for( int i = 0; i < N; i++){
+        y[i] += J(x, l);
+        x+=h;
+    }
     A = amplitude(k, l, h, a, V_0, y);
-    cout << A;
 
 
+    output << delta( k, l, A ).real();
+        output << endl;
+
+}
+
+    output.close();
 
 }
 
@@ -104,7 +113,7 @@ double j( double x, int l){
 double J( double x, int l){
     return x*j(x, l);
 }
-double F( double x, int l, double a, double V_0, int k ){
+double F( double x, int l, double a, double V_0, double k ){
     return l*(l+1)/x/x + potential_V(x, a, V_0) - double(k*k);
 }
 
@@ -116,7 +125,7 @@ void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector
     }
     for (int i = D.size()-1; i > 0; i--){
 
-        x[i-1] -= x[i]*Du[i]/D[i];
+        x[i-1] -= x[i]*Du[i-1]/D[i];
     }
     for (int i=0; i < D.size(); i++){
         x[i]/=D[i];
@@ -129,7 +138,7 @@ void print( vector<complex<double> > A ){
 };
 
 
-complex<double> amplitude( int k, int l, double h, double a, double V_0, vector<complex<double> > y ){
+complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y ){
     complex<double> S=0;
     double x = h;
     int i=0;
@@ -140,4 +149,7 @@ complex<double> amplitude( int k, int l, double h, double a, double V_0, vector<
     }
     S /= (k*k);
     return S;
+}
+complex<double> delta( double k, int l, complex<double> A ){
+    return std::log(complex<double>(1,0)+complex<double>(2*k,0)*A*complex<double>(0,1) )/complex<double>(0,2);
 }
