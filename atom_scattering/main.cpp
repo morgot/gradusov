@@ -82,7 +82,7 @@ int main()
     A = amplitude(k, l, h, a, V_0, y);
 
 
-    output << delta( k, l, A ).real();
+    output << delta( k, l, A );
         output << endl;
 
 }
