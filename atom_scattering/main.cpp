@@ -48,12 +48,12 @@ int main()
     for ( int i = 0; i <= N-1; i++){
 
         if( i != 0 ) {
-            Dl[i-1] = complex<double>( 1 - h*h/12.0*F( x-h, l, a, V_0, k ), 0 );
+            Dl[i-1] = complex<double>( 1 - (h*h/12.0)*F( x-h, l, a, V_0, k ), 0 );
         }
         D[i] = complex<double>( (-2)-10*F( x, l, a, V_0, k )*h*h/12.0, 0);
 
         if( i != N-1 ){
-            Du[i] = complex<double>(1 - h*h/12.0*F( x+h, l, a, V_0, k ), 0);
+            Du[i] = complex<double>(1 - (h*h/12.0)*F( x+h, l, a, V_0, k ), 0);
         }
         x += h;
 
