@@ -76,21 +76,6 @@ int main()
 
     linSolve(Dl, D, Du, f, y);
 	
-	vector<complex<double> > Ql(2), Q(3), Qu(2), G(3), O(3);
-	Ql[0] = 3; Ql[1] = 6;
-	Q[0]  = 1; Q[1]  = 4; Q[2] = 7;
-	Qu[0] = 2; Qu[1] = 5;
-	
-	G[0] = 5; G[1] = 26; G[2] = 33;
-	
-	linSolve(Ql,Q,Qu,G,O);
-	
-	for (int i = 1; i <= 3; i++) {
-		cout << Ql[i]*O[i] + Q[i]*O[i+1] + Qu[i]*O[i+2] << "||" << G[i-1] << endl;	
-	}
-	
-	
-	
 	x=0;
     for( int i = 0; i < N; i++){
         y[i] += J(x, l);
@@ -156,6 +141,7 @@ void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector
         x[i]/=D[i];
     }
 }
+
 void print( vector<complex<double> > A ){
     for(int j = 0; j < A.size(); j++){
             std::cout << A[j] << std::endl;
