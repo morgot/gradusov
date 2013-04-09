@@ -43,8 +43,8 @@ int main()
     cout << endl;
 
     ofstream output("output.txt");
-    for (double k = 0.05; k<5; k+=0.05){
-
+//    for (double k = 0.05; k<5; k+=0.05){
+	k = 1;
     // Расчет матрицы A:
     vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
     h = x_max/N;
@@ -75,7 +75,23 @@ int main()
 
 
     linSolve(Dl, D, Du, f, y);
-    x=0;
+	
+	vector<complex<double> > Ql(2), Q(3), Qu(2), G(3), O(3);
+	Ql[0] = 3; Ql[1] = 6;
+	Q[0]  = 1; Q[1]  = 4; Q[2] = 7;
+	Qu[0] = 2; Qu[1] = 5;
+	
+	G[0] = 5; G[1] = 26; G[2] = 33;
+	
+	linSolve(Ql,Q,Qu,G,O);
+	
+	for (int i = 1; i <= 3; i++) {
+		cout << Ql[i]*O[i] + Q[i]*O[i+1] + Qu[i]*O[i+2] << "||" << G[i-1] << endl;	
+	}
+	
+	
+	
+	x=0;
     for( int i = 0; i < N; i++){
         y[i] += J(x, l);
         x+=h;
@@ -86,7 +102,7 @@ int main()
     output << delta_second( k, l, A );
         output << endl;
 
-}
+//}
 
     output.close();
 

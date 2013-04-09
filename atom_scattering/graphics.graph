@@ -1,0 +1,5 @@
+#!/bin/gnuplot -persist
+set terminal png
+set nokey
+set output out_file.iterator.".png"
+plot in_file with lines
