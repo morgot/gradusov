@@ -90,9 +90,9 @@ int main()
 		x+=h;
 	}
 	A = amplitude(k, l, h, a, V_0, y);
-	//output << A;
 
-	output << delta_second ( k, l, A );
+
+	output << delta_second( k, l, A );
 	output << endl;
 
     }
@@ -102,7 +102,7 @@ int main()
 }
 
 
-double potential_V( double r, double a, double V_0 ) {
+double potential_V( double r, double a, double V_0 ){
     if( r > a ) return 0;
     else {
           return -V_0;
@@ -158,21 +158,16 @@ void print( vector<complex<double> > A ){
 
 
 complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y ){
-   complex<double> S=0;
-	double x = h;
-	int i = 0;
-	while ( x <= a ) {
-		S += (h/3)*(
-				J(k*(x       ),l) * potential_V(x,       a, V_0 ) * y[i  ] +
-			      4*J(k*(x + h   ),l) * potential_V(x + h,   a, V_0 ) * y[i+1] +
-				J(k*(x + 2*h ),l) * potential_V(x + 2*h, a, V_0 ) * y[i+2] 
-			);
-		i += 2;
-		x += 2*h;
-	}
-	
-	S /= (k*k);
-	return S;
+    complex<double> S=0;
+    double x = h;
+    int i=0;
+    while( x <= a){
+        S+=h/3*( J(x-h,l)*potential_V(x-h, a, V_0)*y[i] + 4*J(x,l)*potential_V(x, a, V_0)*y[i+1] + J(x+h,l)*potential_V(x+h, a, V_0)*y[i+2]);
+        x += h;
+        i++;
+    }
+    S /= (k*k);
+    return S;
 }
 
 complex<double> delta( double k, int l, complex<double> A ){

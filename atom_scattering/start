@@ -1,1 +1,1 @@
-gnuplot -e "out_file='test'; in_file='output.txt';" graphics.graph
+gnuplot -e "out_file='test'; in_file='output.txt'; iterator=1" graphics.graph
