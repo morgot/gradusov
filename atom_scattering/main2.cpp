@@ -53,27 +53,27 @@ int main() {
 //===============================================
 //=================== SOVLE =====================
 //===============================================
-	for( double k = 0.05; k < 5; k+=0.05 ) {
+	for( double k = 0.05; k <= 20; k+=0.05 ) {
 		vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
 		h = x_max/N;
 		double x = h;
 		
 		//===============================
 		 D[0] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) ,0);
-		Du[0] = complex<double>( 1 - (h*h/12.0)*F(x+h,k) ,0);
+		Du[0] = complex<double>( 1.0 - (h*h/12.0)*F(x+h,k) ,0);
 		
 		for ( int i = 1; i < N-1; i++ ) {
 			x = (i+1)*h;
 			
-			Dl[i-1] = complex<double>( 1 - (h*h/12.0)*F(x-h,k) ,0);
+			Dl[i-1] = complex<double>( 1.0 - (h*h/12.0)*F(x-h,k) ,0);
 			D[i] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) ,0);
-			Du[i] = complex<double>( 1 - (h*h/12.0)*F(x+h,k) ,0);
+			Du[i] = complex<double>( 1.0 - (h*h/12.0)*F(x+h,k) ,0);
 		}
 		
 		x = N*h;
-		Dl[N-2] = complex<double>( 1 - (h*h/12.0)*F(x-h,k) ,0);
-		D[N-1] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) + ( 1 - (h*h/12.0)*F(x+h,k))*cos(k*h)
-					,( 1 - (h*h/12.0)*F(x+h,k))*sin(k*h) );
+		Dl[N-2] = complex<double>( 1.0 - (h*h/12.0)*F(x-h,k) ,0);
+		D[N-1] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) + ( 1.0 - (h*h/12.0)*F(x+h,k))*cos(k*h)
+					,( 1.0 - (h*h/12.0)*F(x+h,k))*sin(k*h) );
 		//===============================
 		
 		for ( int i = 0; i < N; i++ ) {
@@ -93,15 +93,18 @@ int main() {
 		//===============================
 		
 		for ( int i = 0; i < N; i++ )
-			y[i] += J((i+1)*h, l);
+			y[i] += J(k*(i+1)*h, l);
 		
 		//===============================
 		
-		A = amplitude (k,y);
-		output << f[20];
-		//output << delta_second( k, A );
-		output << amplitude (k,y);
+		cout << "=====" << endl;
+		for ( int i = 0; i < N; i++ )
+			cout << Dl[i] << endl;
+		cout << "=====" << endl;
 		
+		A = amplitude (k,y);
+		
+		output << delta_second( k, A );		
 		output << endl;
 	}
 	
@@ -113,7 +116,7 @@ double F (double x, double k) {
 }
 
 double potential_V ( double x ) {
-	return x>a ? 0 : -V_0;
+	return (x>=a)&&(x<=0) ? 0 : -V_0;
 }
 
 double J ( double x, int num ) {
@@ -121,9 +124,18 @@ double J ( double x, int num ) {
 }
 
 double j ( double x, int num ) {
-	if ( num == 0) return (sin(x)/x);
-	else if ( num == 1) return (sin(x)/(x*x)-cos(x)/x);
-	else return (2*num + 1)*j(x,num-1)/x - j(x,num-2);
+	if ( num == 0) {
+		if ( x == 0 ) return 1;
+		else return (sin(x)/x);
+	}
+	else if ( num == 1) {
+		if (x == 0) return 0;
+		return (sin(x)/(x*x)-cos(x)/x);
+	}
+	else {
+		if (x == 0 ) return 0;
+		return (2*num + 1)*j(x,num-1)/x - j(x,num-2);
+	}
 }
 
 void linSolve(

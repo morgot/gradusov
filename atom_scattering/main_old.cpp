@@ -47,7 +47,7 @@ int main()
 //=========================================================================
 //=========================================================================
 
-    for (double k = 0.05; k<5; k+=0.05) {
+    for (double k = 0.05; k<=20; k+=0.05) {
 
 	// Расчет матрицы A:
 	vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
@@ -86,13 +86,20 @@ int main()
 		
 		x=0;
 	for( int i = 0; i < N; i++){
-		y[i] += J(x, l);
+		y[i] += J(k*x, l);
 		x+=h;
 	}
+	
+	cout << "=====" << endl;
+		for ( int i = 0; i < N; i++ )
+			cout << Dl[i] << endl;
+		cout << "=====" << endl;
+	
 	A = amplitude(k, l, h, a, V_0, y);
+	//cout << A << endl;
+	
 
-
-	output << delta_second( k, l, A );
+	output << delta ( k, l, A );
 	output << endl;
 
     }
@@ -102,7 +109,7 @@ int main()
 }
 
 
-double potential_V( double r, double a, double V_0 ){
+double potential_V( double r, double a, double V_0 ) {
     if( r > a ) return 0;
     else {
           return -V_0;
@@ -158,16 +165,21 @@ void print( vector<complex<double> > A ){
 
 
 complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y ){
-    complex<double> S=0;
-    double x = h;
-    int i=0;
-    while( x <= a){
-        S+=h/3*( J(x-h,l)*potential_V(x-h, a, V_0)*y[i] + 4*J(x,l)*potential_V(x, a, V_0)*y[i+1] + J(x+h,l)*potential_V(x+h, a, V_0)*y[i+2]);
-        x += h;
-        i++;
-    }
-    S /= (k*k);
-    return S;
+   complex<double> S = 0;
+	double x = h;
+	int i = 0;
+	while ( x <= a ) {
+		S += (h/3)*(
+				J(k*(x       ),l) * potential_V(x,       a, V_0 ) * y[i  ] +
+			      4*J(k*(x + h   ),l) * potential_V(x + h,   a, V_0 ) * y[i+1] +
+				J(k*(x + 2*h ),l) * potential_V(x + 2*h, a, V_0 ) * y[i+2] 
+			);
+		i += 2;
+		x += 2*h;
+	}
+	
+	S /= (k*k);
+	return S;
 }
 
 complex<double> delta( double k, int l, complex<double> A ){

@@ -5,137 +5,168 @@
 #include <fstream>
 using namespace std;
 
-double potential_V ( double r, double a, double V_0 );
-double F( double x, int l, double a, double V_0, double k );
+int N, l;
+double h, V_0, a, x_max;
 
-double j( double x, int l);
-double J( double x, int l);
-void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector<complex<double> >  Du, vector<complex<double> >  f, vector<complex<double> >  &x);
-void print( vector<complex<double> > A );
+double F (double x, double k);
+double potential_V ( double x );
+double J ( double x, int num );
+double j ( double x, int num );
+void linSolve(
+		  vector<complex<double> >  Dl
+		, vector<complex<double> >  D
+		, vector<complex<double> >  Du
+		, vector<complex<double> >  f
+		, vector<complex<double> >  &x
+		);
+complex<double> amplitude ( double k, vector<complex<double> > y);
+complex<double> delta( double k, complex<double> A );
+double delta_second( double k, complex<double> A );
 
-complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y );
-complex<double> delta( double k, int l, complex<double> A );
-double delta_second( double k, int l, complex<double> A );
+int main() {
 
-int main()
-{
-    // Ввод входных параметров:
-    int N, l, k;
-    double h, V_0, a, x_max;
+//===============================================
+//=================== INPUT =====================
+//===============================================
+	
+	complex<double> A;
+	cout << "Введите количество шагов N: ";
+	cin >> N;
+	cout << endl;
 
-    complex<double> A;
-    cout << "Введите количество шагов N: ";
-    cin >> N;
-    cout << endl;
+	cout << "Введите V_0: ";
+	cin >> V_0;
+	cout << endl;
 
-    cout << "Введите V_0: ";
-    cin >> V_0;
-    cout << endl;
+	cout << "Введите a: ";
+	cin >> a;
+	cout << endl;
 
-    cout << "Введите a: ";
-    cin >> a;
-    cout << endl;
+	x_max = 1.5*a;
 
-    x_max = 1.5*a;
+	cout << "Введите l: ";
+	cin >> l;
+	cout << endl;
 
-    cout << "Введите l: ";
-    cin >> l;
-    cout << endl;
+	ofstream output("output.txt");
 
-    ofstream output("output.txt");
-
-//=========================================================================
-//=========================================================================
-
-    for (double k = 0.05; k<5; k+=0.05) {
-
-	// Расчет матрицы A:
-	vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
-	h = x_max/N;
-	double x = h;
-
-	for ( int i = 0; i <= N-1; i++) {
-
-		if( i != 0 ) {
-		Dl[i-1] = complex<double>( 1 - (h*h/12.0)*F( x-h, l, a, V_0, k ), 0 );
-		}
-
-		D[i] = complex<double>( (-2.0)-10.0*F( x, l, a, V_0, k )*h*h/12.0, 0);
-
-		if( i != N-1 ){
-		Du[i] = complex<double>(1 - (h*h/12.0)*F( x+h, l, a, V_0, k ), 0);
-		}
-		x += h;
-
-	}
-
-	D[N-1] = complex<double>( (-2)-10*F( x-h, l, a, V_0, k )*h*h/12.0+cos(k*h)*(1-F(x,l, a, V_0, k)*h*h/12.0), sin(k*h)*(1-F(x,l, a, V_0, k)*h*h/12.0) );
-
-	x = h;
-	for( int i = 0; i < N; i++){
-		f[i] = (
-			 potential_V(x+h, a, V_0) * J(k*(x+h),l) +
-		      10*potential_V(x,   a, V_0) * J(k* x   ,l) +
-			 potential_V(x-h, a, V_0) * J(k*(x-h),l)
-			)*h*h/12.0;
-		x += h;
-	}
-
-
-	linSolve(Dl, D, Du, f, y);
+//===============================================
+//=================== SOVLE =====================
+//===============================================
+	for( double k = 0.05; k <= 20; k+=0.05 ) {
+		vector<complex<double> > Dl(N-1), D(N), Du(N-1), f(N), y(N);
+		h = x_max/N;
+		double x = h;
 		
-		x=0;
-	for( int i = 0; i < N; i++){
-		y[i] += J(x, l);
-		x+=h;
+		//===============================
+		 D[0] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) ,0);
+		Du[0] = complex<double>( 1.0 - (h*h/12.0)*F(x+h,k) ,0);
+		
+		for ( int i = 1; i < N-1; i++ ) {
+			x = (i+1)*h;
+			
+			Dl[i-1] = complex<double>( 1.0 - (h*h/12.0)*F(x-h,k) ,0);
+			D[i] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) ,0);
+			Du[i] = complex<double>( 1.0 - (h*h/12.0)*F(x+h,k) ,0);
+		}
+		
+		x = N*h;
+		Dl[N-2] = complex<double>( 1.0 - (h*h/12.0)*F(x-h,k) ,0);
+		D[N-1] = complex<double>( -2.0 - 10.0*(h*h/12.0)*F(x,k) + ( 1.0 - (h*h/12.0)*F(x+h,k))*cos(k*h)
+					,( 1.0 - (h*h/12.0)*F(x+h,k))*sin(k*h) );
+		//===============================
+		
+		for ( int i = 0; i < N; i++ ) {
+ 			x = (i+1)*h;
+			
+			f[i] = (
+			 potential_V(x+h) * J( k*(x+h),l ) +
+		      10*potential_V( x ) * J( k*( x ),l ) +
+			 potential_V(x-h) * J( k*(x-h),l )
+			)*h*h/12.0;
+		}
+		
+		//===============================
+		
+		linSolve(Dl, D, Du, f, y);
+		
+		//===============================
+		
+		for ( int i = 0; i < N; i++ )
+			y[i] += J(k*(i+1)*h, l);
+		
+		//===============================
+		
+		cout << "=====" << endl;
+		for ( int i = 0; i < N; i++ )
+			cout << f[i] << endl;
+		cout << "=====" << endl;
+		
+		A = amplitude (k,y);
+		
+		output << delta_second( k, A );		
+		output << endl;
+		
+		//===============================
+		
+		vector<complex<double> > Ol(2), O(3), Ou(2), g(3), z(3);
+		Ol[0] = complex<double>(0,3);
+		Ol[1] = complex<double>(0,6);
+		
+		O[0] = complex<double>(0,1);
+		O[1] = complex<double>(0,4);
+		O[2] = complex<double>(0,7);
+		
+		Ou[0] = complex<double>(0,2);
+		Ou[1] = complex<double>(0,5);
+		
+		g[0] = complex<double>(0,5);
+		g[1] = complex<double>(0,26);
+		g[2] = complex<double>(0,33);
+		
+		linSolve(Ol, O, Ou, g, z);
+		
+		for ( int i = 0; i<3; i++ )
+			cout << z[i] << endl;
 	}
-	A = amplitude(k, l, h, a, V_0, y);
-	//output << A;
-
-	output << delta_second ( k, l, A );
-	output << endl;
-
-    }
-
-    output.close();
-
+	
+	output.close();
 }
 
-
-double potential_V( double r, double a, double V_0 ) {
-    if( r > a ) return 0;
-    else {
-          return -V_0;
-    }
+double F (double x, double k) {
+	return (l*(l+1))/(x*x) + potential_V(x) - double(k*k);
 }
 
-double j( double x, int l){
-    if (l == 0){
-
-        if (x==0) return 1;
-        return sin( x )/x;
-
-    } else if (l == 1){
-
-        if (x==0) return 0;
-        return sin( x )/(x*x) - cos( x )/x;
-
-    } else {
-
-        if (x==0) return 0;
-        return (2*l-1)*j(x, l-1)/x - j(x, l-2);
-    }
-
+double potential_V ( double x ) {
+	return (x>=a)||(x<=0) ? 0 : -V_0;
 }
 
-double J( double x, int l){
-    return x*j(x, l);
-}
-double F( double x, int l, double a, double V_0, double k ){
-    return l*(l+1)/(x*x) + potential_V(x, a, V_0) - double(k*k);
+double J ( double x, int num ) {
+	return x*j(x,num);
 }
 
-void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector<complex<double> >  Du, vector<complex<double> >  f, vector<complex<double> >  &x){
+double j ( double x, int num ) {
+	if ( num == 0) {
+		if ( x == 0 ) return 1;
+		else return (sin(x)/x);
+	}
+	else if ( num == 1) {
+		if (x == 0) return 0;
+		return (sin(x)/(x*x)-cos(x)/x);
+	}
+	else {
+		if (x == 0 ) return 0;
+		return (2*num + 1)*j(x,num-1)/x - j(x,num-2);
+	}
+}
+
+void linSolve(
+		  vector<complex<double> >  Dl
+		, vector<complex<double> >  D
+		, vector<complex<double> >  Du
+		, vector<complex<double> >  f
+		, vector<complex<double> >  &x
+		) {
     x = f;
     for (int i = 0; i < D.size()-1; i++){
         D[i+1]-=Du[i]*Dl[i]/D[i];
@@ -150,35 +181,28 @@ void linSolve( vector<complex<double> >  Dl, vector<complex<double> >  D, vector
     }
 }
 
-void print( vector<complex<double> > A ){
-    for(int j = 0; j < A.size(); j++){
-            std::cout << A[j] << std::endl;
-        };
-};
-
-
-complex<double> amplitude( double k, int l, double h, double a, double V_0, vector<complex<double> > y ){
-   complex<double> S=0;
+complex<double> amplitude ( double k, vector<complex<double> > y) {
+	complex<double> S=0;
 	double x = h;
 	int i = 0;
-	while ( x <= a ) {
-		S += (h/3)*(
-				J(k*(x       ),l) * potential_V(x,       a, V_0 ) * y[i  ] +
-			      4*J(k*(x + h   ),l) * potential_V(x + h,   a, V_0 ) * y[i+1] +
-				J(k*(x + 2*h ),l) * potential_V(x + 2*h, a, V_0 ) * y[i+2] 
+	while ( x < a ) {
+		S += (h/3)*( 
+				J(k*(x       ),l) * potential_V(x       ) * y[i  ] +
+			      4*J(k*(x + h   ),l) * potential_V(x + h   ) * y[i+1] +
+				J(k*(x + 2*h ),l) * potential_V(x + 2*h ) * y[i+2] 
 			);
-		i += 2;
-		x += 2*h;
+		i+=2;
+		x+=2*h;
 	}
 	
 	S /= (k*k);
 	return S;
 }
 
-complex<double> delta( double k, int l, complex<double> A ){
+complex<double> delta( double k, complex<double> A ){
     return std::log(complex<double>(1,0)+complex<double>(2*k,0)*A*complex<double>(0,1) )/complex<double>(0,2);
 }
 
-double delta_second ( double k, int l, complex<double> A ) {
+double delta_second ( double k, complex<double> A ) {
 	return atan( 2*k*A.real()/(1-2*k*A.imag()) )/2;
 }
